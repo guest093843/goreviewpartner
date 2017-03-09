@@ -29,7 +29,7 @@ def get_moves_number(move_zero):
 	return k
 
 def go_to_move(move_zero,move_number=0):
-	
+
 	if move_number==0:
 		return move_zero
 	move=move_zero
@@ -45,21 +45,21 @@ def go_to_move(move_zero,move_number=0):
 
 def gtp2ij(move):
 	#print "gtp2ij(",move,")"
-	
+
 	# a18 => (17,0)
-	letters=['a','b','c','d','e','f','g','h','j','k','l','m','n','o','p','q','r','s','t']
+	letters=['A','B','C','D','E','F','G','H','J','K','L','M','N','O','P','Q','R','S','T']
 	return int(move[1:])-1,letters.index(move[0])
 
-		
+
 
 
 def ij2gtp(m):
 	# (17,0) => a18
-	
+
 	if m==None:
 		return "pass"
 	i,j=m
-	letters=['a','b','c','d','e','f','g','h','j','k','l','m','n','o','p','q','r','s','t']
+	letters=['A','B','C','D','E','F','G','H','J','K','L','M','N','O','P','Q','R','S','T']
 	return letters[j]+str(i+1)
 
 
@@ -85,31 +85,31 @@ class RunAnalysis(Frame):
 		self.lock1=threading.Lock()
 		self.lock2=threading.Lock()
 		self.initialize()
-	
+
 	def run_analysis(self,current_move):
 			gnugo=self.gnugo
 			leela=self.leela
 			max_move=self.max_move
-			
+
 			one_move=go_to_move(self.move_zero,current_move)
 			player_color,player_move=one_move.get_move()
-			
+
 			print "move",str(current_move)+'/'+str(max_move),
-			
+
 			#final_score=leela.get_leela_final_score()
 			final_score=gnugo.get_gnugo_estimate_score()
-			
+
 			print final_score,
-			
+
 			#one_move.add_comment_text("\nGnugo score estimation: "+final_score)
-			
+
 			additional_comments="Move "+str(current_move)
 			if player_color in ('w',"W"):
 				additional_comments+="\nWhite to play, in the game, white played "+ij2gtp(player_move)
 			else:
 				additional_comments+="\nBlack to play, in the game, black played "+ij2gtp(player_move)
 			additional_comments+="\nGnugo score estimation before the move was played: "+final_score
-			
+
 			try:
 				if player_color in ('w',"W"):
 					print "leela play white"
@@ -124,10 +124,10 @@ class RunAnalysis(Frame):
 				print e
 				print "leaving thread..."
 				exit()
-			
+
 			all_moves=leela.get_all_leela_moves()
 			if (answer.lower() not in ["pass","resign"]):
-				
+
 				if all_moves==[]:
 					all_moves=[[answer,answer,666]]
 				all_moves2=all_moves[:]
@@ -143,9 +143,9 @@ class RunAnalysis(Frame):
 						leela.place_white(answer)
 					else:
 						leela.place_black(answer)
-					
+
 				#making sure the first line of play is more than one move deep
-				while (len(all_moves2[0][1].split(' '))==1) and (answer.lower() not in ["pass","resign"]):	
+				while (len(all_moves2[0][1].split(' '))==1) and (answer.lower() not in ["pass","resign"]):
 					print "going deeper for first line of play (",nb_undos,")"
 					try:
 						if player_color in ('w',"W") and nb_undos%2==0:
@@ -160,7 +160,7 @@ class RunAnalysis(Frame):
 						else:
 							#print "\tleela play white"
 							answer=leela.play_white()
-						
+
 						if answer.lower()!="resign":
 							nb_undos+=1
 					except Exception, e:
@@ -175,7 +175,7 @@ class RunAnalysis(Frame):
 					print all_moves[0],'+',answer,
 					all_moves2=leela.get_all_leela_moves()
 					if (answer.lower() not in ["pass","resign"]):
-						
+
 						print "all_moves2:",all_moves2
 						if all_moves2==[]:
 							all_moves2=[[answer,answer,666]]
@@ -187,11 +187,11 @@ class RunAnalysis(Frame):
 								leela.place_white(answer)
 							else:
 								leela.place_black(answer)
-						
+
 						print '+',all_moves2
 						all_moves[0][1]+=" "+all_moves2[0][1]
-						
-						
+
+
 						if (player_color.lower()=='b' and nb_undos%2==1) or (player_color.lower()=='w' and nb_undos%2==1):
 							all_moves[0][2]=all_moves2[0][2]
 						else:
@@ -201,21 +201,21 @@ class RunAnalysis(Frame):
 						print
 				for u in range(nb_undos):
 					leela.undo()
-				
+
 				#print "all moves from leela:",all_moves
 				best_move=True
 				#variation=-1
 				for _,one_sequence,one_score in all_moves:
 					previous_move=one_move.parent
 					current_color=player_color
-					
+
 					if best_move:
 						best_move=False
 						if player_color=='b':
 							print str(one_score)+'%/'+str(100-one_score)+'%',
 						else:
 							print str(100-one_score)+'%/'+str(one_score)+'%',
-					
+
 					#variation+=1
 					#deepness=-1
 					for one_deep_move in one_sequence.split(' '):
@@ -228,13 +228,13 @@ class RunAnalysis(Frame):
 						new_child=previous_move.new_child()
 						new_child.set_move(current_color,(i,j))
 						#new_child.add_comment_text("black/white win probability: "+str(one_score)+'%/'+str(100-one_score)+'%')
-						
-						
+
+
 						if player_color=='b':
 							new_child.add_comment_text("black/white win probability for this variation: "+str(one_score)+'%/'+str(100-one_score)+'%')
 						else:
 							new_child.add_comment_text("black/white win probability for this variation: "+str(100-one_score)+'%/'+str(one_score)+'%')
-						
+
 						previous_move=new_child
 						if current_color in ('w','W'):
 							current_color='b'
@@ -245,22 +245,22 @@ class RunAnalysis(Frame):
 				additional_comments+="\nFor this position, Leela would "+answer.lower()
 				if answer.lower()=="pass":
 					leela.undo()
-			
+
 			one_move.add_comment_text(additional_comments)
 
 			new_file=open(self.filename[:-4]+".rsgf",'w')
 			new_file.write(self.g.serialise())
 			new_file.close()
-			
+
 			if player_color in ('w',"W"):
 				leela.place_white(ij2gtp(player_move))
 				gnugo.place_white(ij2gtp(player_move))
 			else:
 				leela.place_black(ij2gtp(player_move))
 				gnugo.place_black(ij2gtp(player_move))
-		
-	
-	
+
+
+
 	def run_all_analysis(self):
 		self.current_move=1
 		#try:
@@ -288,7 +288,7 @@ class RunAnalysis(Frame):
 			print "leaving thread"
 			exit()"""
 
-		
+
 
 	def follow_analysis(self):
 		if self.lock1.acquire(False):
@@ -308,7 +308,7 @@ class RunAnalysis(Frame):
 			self.root.after(500,self.follow_analysis)
 		else:
 			self.lab1.config(text="Completed")
-	
+
 	def close_app(self):
 		print "RunAnalysis beeing closed"
 		print "killing gnugo"
@@ -320,41 +320,41 @@ class RunAnalysis(Frame):
 		self.parent.destroy()
 		print "RunAnalysis closed"
 
-		
+
 	def initialize(self):
-		
+
 		Config = ConfigParser.ConfigParser()
 		Config.read("config.ini")
-		
-		
+
+
 		txt = open(self.filename)
 		self.g = sgf.Sgf_game.from_string(txt.read())
 		size=self.g.get_size()
-		
+
 		leela_command_line=tuple(Config.get("Leela", "Command").split())
 		leela=gtp(leela_command_line)
 		leela.boardsize(size)
 		leela.reset()
 		self.leela=leela
-		
+
 		gnugo_command_line=tuple(Config.get("GnuGo", "Command").split())
 		gnugo=gtp(gnugo_command_line)
 		gnugo.boardsize(size)
 		gnugo.reset()
 		self.gnugo=gnugo
-		
+
 		self.time_per_move=int(Config.get("Analysis", "TimePerMove"))
 		leela.set_time(main_time=self.time_per_move,byo_yomi_time=self.time_per_move,byo_yomi_stones=1)
 		self.move_zero=self.g.get_root()
 		komi=self.g.get_komi()
 		leela.komi(komi)
 		gnugo.komi(komi)
-		
-		
-		
+
+
+
 		board, plays = sgf_moves.get_setup_and_moves(self.g)
 		handicap_stones=""
-		
+
 		for colour, move0 in board.list_occupied_points():
 			if move0 != None:
 				row, col = move0
@@ -367,16 +367,16 @@ class RunAnalysis(Frame):
 					print "Adding initial black stone at",move
 					leela.place_black(move)
 					gnugo.place_black(move)
-						
-			
+
+
 		self.max_move=get_moves_number(self.move_zero)
-		
-		
+
+
 		root = self
 		root.parent.title('GoReviewPartner')
 		root.parent.protocol("WM_DELETE_WINDOW", self.close_app)
-		
-		
+
+
 		Label(root,text="Analysis of: "+os.path.basename(self.filename)).pack()
 		self.lab1=Label(root)
 
@@ -402,13 +402,13 @@ class RunAnalysis(Frame):
 
 		self.lock2.acquire()
 		threading.Thread(target=self.run_all_analysis).start()
-		
+
 		self.root=root
 		root.after(500,self.follow_analysis)
-		
 
-		
-		
+
+
+
 
 if __name__ == "__main__":
 
